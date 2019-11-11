@@ -4,6 +4,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define _USE_MATH_DEFINES // for pi value
+#include <math.h> 
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -13,6 +16,7 @@
 
 // window dimensions
 const GLint WIDTH = 800, HEIGHT = 600;
+const float toRadians = M_PI / 180.0f;
 
 GLuint VAO, VBO, shader, uniformModel;
 
@@ -215,7 +219,9 @@ int main()
 		glUseProgram(shader);
 
 		glm::mat4 model;
+		//model = glm::rotate(model, 45 * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
 		model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
+		
 		
 
 		glUniform1f(uniformModel,triOffset);
