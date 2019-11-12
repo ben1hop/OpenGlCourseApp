@@ -18,7 +18,7 @@
 const GLint WIDTH = 800, HEIGHT = 600;
 const float toRadians = M_PI / 180.0f;
 
-GLuint VAO, VBO, shader, uniformModel;
+GLuint VAO, VBO, IBO, shader, uniformModel;
 
 bool direction = true;
 float triOffset = 0.0f;
@@ -68,14 +68,27 @@ void main()														\n\
 
 
 void CreateTriangle() {
+
+	unsigned int indicies[] = {
+		0, 3, 1,
+		1, 3, 2,
+		2, 3, 0,
+		0, 1, 2
+	};
+
 	GLfloat vertices[] = {
 		-1.0f , -1.0f, 0.0f,
+		0.0f, -1.0f, 1.0f,
 		1.0f , -1.0f , 0.0f,
 		0.0f , 1.0f , 0.0f
 	};
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
+
+	glGenBuffers(1, &IBO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -85,6 +98,7 @@ void CreateTriangle() {
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 	glBindVertexArray(0);
 
@@ -202,6 +216,8 @@ int main()
 		return 1;
 	}
 
+	glEnable(GL_DEPTH_TEST);
+
 	// Create Viewport
 	glViewport(0,0,bufferWidth,bufferHeight);
 
@@ -224,7 +240,7 @@ int main()
 			direction = !direction;
 		}
 
-		curAngle += 0.09f;
+		curAngle += 0.5f;
 		if (curAngle >= 360) {
 			curAngle -= 360;
 		}
@@ -242,12 +258,12 @@ int main()
 
 		// Clear the window
 		glClearColor(0.0f , 0.0f , 0.0f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(shader);
 
 		glm::mat4 model;
-		//model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 0.0f, 1.0f));
+		model = glm::rotate(model, curAngle * toRadians, glm::vec3(0.0f, 1.0f, 0.0f));
 		//model = glm::translate(model, glm::vec3(triOffset, 0.0f, 0.0f));
 		model = glm::scale(model, glm::vec3(0.4f,0.4f,0.4f));
 		
@@ -256,7 +272,9 @@ int main()
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+		glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
 		glUseProgram(0);
