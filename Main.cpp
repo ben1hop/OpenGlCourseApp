@@ -22,6 +22,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Light.h"
 
 
 Window mainWindow;
@@ -32,6 +33,7 @@ Camera camera;
 Texture brickTexture;
 Texture dirtTexture;
 
+Light mainLight;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
@@ -102,8 +104,9 @@ int main()
 	dirtTexture = Texture::Texture((char*)("Textures/dirt.png"));
 	dirtTexture.LoadTexture();
 
+	mainLight = Light(1.0f,1.0f,1.0f,0.2f);
 
-	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0, uniformAmbientIntensity = 0, uniformAmbientColour = 0;
 
 	glm::mat4 projection = glm::perspective(45.0f, mainWindow.getBufferWidth() / mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
@@ -129,6 +132,10 @@ int main()
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
 		uniformView = shaderList[0].GetViewLocation();
+		uniformAmbientColour = shaderList[0].GetAmbientColourLocation();
+		uniformAmbientIntensity = shaderList[0].GetAmbientIntensityLocation();
+
+		mainLight.UseLight(uniformAmbientIntensity, uniformAmbientColour);
 
 
 		// 1st object
